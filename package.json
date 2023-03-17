@@ -4,9 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf dist && tsc",
+    "start": "node dist/main/api",
+    "start-clean": "yarn build && yarn start"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/module-alias": "^2.0.1",
+    "@types/node": "^18.15.3",
+    "typescript": "^5.0.2"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "module-alias": "^2.2.2",
+    "rimraf": "^4.4.0"
+  }
 }
