@@ -6,21 +6,16 @@ import { AuthenticationError } from "@/domain/errors";
 
 const MOCK_PARAMS: LoadFacebookUserApi.Params = { token: "any_token" };
 
-type SutTypes = {
-  sut: FacebookAuthenticationService;
-  loadFacebookUserApi: MockProxy<LoadFacebookUserApi>;
-};
-
-const makeSut = (): SutTypes => {
-  const loadFacebookUserApi = mock<LoadFacebookUserApi>();
-  const sut = new FacebookAuthenticationService(loadFacebookUserApi);
-  return { sut, loadFacebookUserApi };
-};
-
 describe("FacebookAuthenticationService", () => {
-  it("Should call LoadFacebookUserApi with correct params", async () => {
-    const { sut, loadFacebookUserApi } = makeSut();
+  let loadFacebookUserApi: MockProxy<LoadFacebookUserApi>;
+  let sut: FacebookAuthenticationService;
 
+  beforeEach(() => {
+    loadFacebookUserApi = mock<LoadFacebookUserApi>();
+    sut = new FacebookAuthenticationService(loadFacebookUserApi);
+  });
+
+  it("Should call LoadFacebookUserApi with correct params", async () => {
     await sut.perform(MOCK_PARAMS);
 
     expect(loadFacebookUserApi.loadUser).toHaveBeenCalledWith(MOCK_PARAMS);
@@ -28,8 +23,6 @@ describe("FacebookAuthenticationService", () => {
   });
 
   it("Should return AuthenticationError when LoadFacebookUserApi returns undefined", async () => {
-    const { sut, loadFacebookUserApi } = makeSut();
-
     loadFacebookUserApi.loadUser.mockResolvedValueOnce(undefined);
 
     const authResult = await sut.perform(MOCK_PARAMS);
