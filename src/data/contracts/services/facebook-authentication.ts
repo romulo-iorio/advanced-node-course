@@ -1,13 +1,8 @@
-import type {
-  CreateFacebookAccountRepository,
-  LoadUserAccountRepository,
-} from "@/data/contracts/repos";
 import type { LoadFacebookUserApi } from "@/data/contracts/apis";
 import type { FacebookAuthentication } from "@/domain/features";
+import type { UserAccount } from "@/data/contracts/repos";
 
 import { AuthenticationError } from "@/domain/errors";
-
-type UserAccount = LoadUserAccountRepository & CreateFacebookAccountRepository;
 
 export class FacebookAuthenticationService {
   constructor(
@@ -23,9 +18,17 @@ export class FacebookAuthenticationService {
     if (fbData === undefined) return new AuthenticationError();
 
     const { email } = fbData;
-    await this.userAccountRepo.load({ email });
+    const accountData = await this.userAccountRepo.load({ email });
 
-    await this.userAccountRepo.createFromFacebook(fbData);
+    if (accountData?.name !== undefined) {
+      await this.userAccountRepo.updateWithFacebook({
+        facebookId: fbData.facebookId,
+        name: accountData.name,
+        id: accountData.id,
+      });
+    } else {
+      await this.userAccountRepo.createFromFacebook(fbData);
+    }
 
     return new AuthenticationError();
   }

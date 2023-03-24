@@ -9,11 +9,11 @@ export namespace LoadFacebookUserApi {
     token: string;
   };
 
-  export type FacebookReturn = {
+  export type Data = {
     facebookId: string;
     email: string;
     name: string;
   };
 
-  export type Result = undefined | FacebookReturn;
+  export type Result = undefined | Data;
 }
