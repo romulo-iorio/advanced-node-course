@@ -5,6 +5,9 @@
   },
   "rules": {
     "@typescript-eslint/quotes": ["off"],
-    "@typescript-eslint/semi": ["off"]
+    "@typescript-eslint/semi": ["off"],
+    "quotes": ["off"],
+    "comma-dangle": ["off"],
+    "semi": ["off"]
   }
 }
