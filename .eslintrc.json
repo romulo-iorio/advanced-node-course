@@ -4,10 +4,14 @@
     "project": "./tsconfig.json"
   },
   "rules": {
-    "@typescript-eslint/quotes": ["off"],
-    "@typescript-eslint/semi": ["off"],
-    "quotes": ["off"],
-    "comma-dangle": ["off"],
-    "semi": ["off"]
+    "@typescript-eslint/quotes": "off",
+    "@typescript-eslint/semi": "off",
+    "quotes": "off",
+    "comma-dangle": "off",
+    "semi": "off",
+    "@typescript-eslint/member-delimiter-style": "off",
+    "@typescript-eslint/consistent-type-definitions": "off",
+    "@typescript-eslint/space-before-function-paren": "off",
+    "@typescript-eslint/no-namespace": "off"
   }
 }
