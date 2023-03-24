@@ -11,6 +11,7 @@
     "lint:fix": "yarn lint -- --fix",
     "test": "jest --passWithNoTests --no-cache --runInBand",
     "test:watch": "yarn test -- --watch",
+    "test:staged": "yarn test -- --findRelatedTests",
     "test:coverage": "yarn test -- --coverage",
     "test:clear": "clear && yarn test"
   },
@@ -27,6 +28,7 @@
     "eslint-plugin-n": "^15.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "jest": "^29.5.0",
+    "lint-staged": "^13.2.0",
     "ts-jest": "^29.0.5",
     "typescript": "*"
   },
