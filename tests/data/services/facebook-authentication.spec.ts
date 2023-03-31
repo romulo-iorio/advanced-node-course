@@ -13,18 +13,23 @@ describe("FacebookAuthenticationService", () => {
   let facebookApi: MockProxy<LoadFacebookUserApi>;
   let userAccountRepo: MockProxy<UserAccount>;
   let crypto: MockProxy<TokenGenerator>;
-
   let sut: FacebookAuthenticationService;
 
-  const facebookId = "any_fb_id";
-  const email = "any_fb_email";
-  const name = "any_fb_name";
-  const token = "any_token";
-  const id = "any_account_id";
+  let token: string;
+  let facebookId: string;
+  let email: string;
+  let name: string;
+  let id: string;
+  let fbData: { facebookId: string; email: string; name: string };
 
-  const fbData = { facebookId, email, name };
+  beforeAll(() => {
+    token = "any_token";
+    facebookId = "any_fb_id";
+    email = "any_fb_email";
+    name = "any_fb_name";
+    id = "any_account_id";
+    fbData = { facebookId, email, name };
 
-  beforeEach(() => {
     facebookApi = mock<LoadFacebookUserApi>();
     facebookApi.loadUser.mockResolvedValue(fbData);
 
@@ -34,7 +39,10 @@ describe("FacebookAuthenticationService", () => {
 
     crypto = mock<TokenGenerator>();
     crypto.generateToken.mockResolvedValue("any_generated_token");
+  });
 
+  beforeEach(() => {
+    // jest.clearAllMocks();
     sut = new FacebookAuthenticationService(
       facebookApi,
       userAccountRepo,
