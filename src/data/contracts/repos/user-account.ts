@@ -9,10 +9,7 @@ export namespace LoadUserAccountRepository {
     email: string;
   };
 
-  export type Data = {
-    id: string;
-    name?: string;
-  };
+  type Data = { id: string; name?: string };
 
   export type Result = undefined | Data;
 }
@@ -20,7 +17,7 @@ export namespace LoadUserAccountRepository {
 export interface SaveFacebookAccountRepository {
   saveWithFacebook: (
     params: SaveFacebookAccountRepository.Params
-  ) => Promise<void>;
+  ) => Promise<SaveFacebookAccountRepository.Result>;
 }
 
 export namespace SaveFacebookAccountRepository {
@@ -30,6 +27,8 @@ export namespace SaveFacebookAccountRepository {
     name: string;
     id?: string;
   };
+
+  export type Result = { id: string };
 }
 
 export type UserAccount = LoadUserAccountRepository &
