@@ -51,23 +51,42 @@ describe("FacebookAuthenticationService", () => {
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1);
   });
 
-  it("Should call CreateFacebookAccountRepo when LoadUserAccountRepo returns undefined", async () => {
+  it("Should create account with facebook data", async () => {
     await sut.perform({ token });
 
-    expect(userAccountRepo.createFromFacebook).toHaveBeenCalledWith(fbData);
-    expect(userAccountRepo.createFromFacebook).toHaveBeenCalledTimes(1);
+    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledWith({
+      facebookId,
+      email,
+      name,
+    });
+    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledTimes(1);
   });
 
-  it("Should call UpdateFacebookAccountRepo when LoadUserAccountRepo returns data", async () => {
+  it("Should not update account name", async () => {
     userAccountRepo.load.mockResolvedValueOnce({ id, name });
 
     await sut.perform({ token });
 
-    expect(userAccountRepo.updateWithFacebook).toHaveBeenCalledWith({
+    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledWith({
       facebookId,
+      email,
       name,
       id,
     });
-    expect(userAccountRepo.updateWithFacebook).toHaveBeenCalledTimes(1);
+    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledTimes(1);
+  });
+
+  it("Should update account name", async () => {
+    userAccountRepo.load.mockResolvedValueOnce({ id });
+
+    await sut.perform({ token });
+
+    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledWith({
+      facebookId,
+      email,
+      name,
+      id,
+    });
+    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledTimes(1);
   });
 });
