@@ -4,6 +4,9 @@ import type { LoadFacebookUserApi } from "@/data/contracts/apis";
 import type { UserAccount } from "@/data/contracts/repos";
 import { FacebookAuthenticationService } from "@/data/contracts/services";
 import { AuthenticationError } from "@/domain/errors";
+import { FacebookAccount } from "@/domain/models";
+
+jest.mock("@/domain/models/facebook-account");
 
 describe("FacebookAuthenticationService", () => {
   let facebookApi: MockProxy<LoadFacebookUserApi>;
@@ -15,7 +18,7 @@ describe("FacebookAuthenticationService", () => {
   const email = "any_fb_email";
   const name = "any_fb_name";
   const token = "any_token";
-  const id = "any_id";
+  // const id = "any_id";
 
   const fbData = { facebookId, email, name };
 
@@ -51,41 +54,16 @@ describe("FacebookAuthenticationService", () => {
     expect(userAccountRepo.load).toHaveBeenCalledTimes(1);
   });
 
-  it("Should create account with facebook data", async () => {
-    await sut.perform({ token });
-
-    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledWith({
-      facebookId,
-      email,
-      name,
-    });
-    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledTimes(1);
-  });
-
-  it("Should not update account name", async () => {
-    userAccountRepo.load.mockResolvedValueOnce({ id, name });
+  it("Should call SaveFacebookAccountRepository with FacebookAccount", async () => {
+    const FacebookAccountStub = jest.fn().mockImplementation(() => ({
+      any: "any",
+    }));
+    jest.mocked(FacebookAccount).mockImplementation(FacebookAccountStub);
 
     await sut.perform({ token });
 
     expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledWith({
-      facebookId,
-      email,
-      name,
-      id,
-    });
-    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledTimes(1);
-  });
-
-  it("Should update account name", async () => {
-    userAccountRepo.load.mockResolvedValueOnce({ id });
-
-    await sut.perform({ token });
-
-    expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledWith({
-      facebookId,
-      email,
-      name,
-      id,
+      any: "any",
     });
     expect(userAccountRepo.saveWithFacebook).toHaveBeenCalledTimes(1);
   });
