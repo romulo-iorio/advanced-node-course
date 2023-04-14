@@ -25,9 +25,9 @@ describe("FacebookApi", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    httpClient.get.mockResolvedValueOnce({
-      access_token: appToken,
-    });
+    httpClient.get
+      .mockResolvedValueOnce({ access_token: appToken })
+      .mockResolvedValueOnce({ data: { user_id: "any_user_id" } });
 
     sut = new FacebookApi(httpClient, clientId, clientSecret);
   });
@@ -51,6 +51,15 @@ describe("FacebookApi", () => {
     expect(httpClient.get).toHaveBeenCalledWith({
       url: `${baseUrl}/debug_token`,
       params: { input_token: clientToken, access_token: appToken },
+    });
+  });
+
+  it("should get user info", async () => {
+    await sut.loadUser({ token: clientToken });
+
+    expect(httpClient.get).toHaveBeenCalledWith({
+      url: `${baseUrl}/any_user_id`,
+      params: { fields: "id,name,email", access_token: clientToken },
     });
   });
 });
