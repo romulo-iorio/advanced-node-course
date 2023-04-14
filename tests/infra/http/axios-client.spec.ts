@@ -48,5 +48,15 @@ describe("AxiosHttpClient", () => {
 
       expect(result).toEqual("any_data");
     });
+
+    it("should rethrow if get throws", async () => {
+      const error = new Error("any_error");
+
+      fakeAxios.get.mockRejectedValueOnce(error);
+
+      const promise = sut.get({ url, params });
+
+      await expect(promise).rejects.toThrow(error);
+    });
   });
 });
