@@ -43,7 +43,7 @@ describe("AxiosHttpClient", () => {
     });
 
     it("should rethrow if get throws", async () => {
-      const error = new Error("any_error");
+      const error = new Error("http_error");
 
       fakeAxios.get.mockRejectedValueOnce(error);
 
