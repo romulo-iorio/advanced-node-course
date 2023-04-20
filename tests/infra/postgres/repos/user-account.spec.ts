@@ -7,25 +7,25 @@ import { makeFakeDb } from "@/tests/infra/postgres/mocks";
 import { PgUser } from "@/infra/postgres/entities";
 
 describe("PgUserAccountRepository", () => {
+  let sut: LoadUserAccountRepository;
+  let pgUserRepo: Repository<PgUser>;
+  let userDataSource: DataSource;
+  let backup: IBackup;
+
+  beforeAll(async () => {
+    const { db, dataSource } = await makeFakeDb();
+    userDataSource = dataSource;
+    backup = db.backup();
+
+    pgUserRepo = userDataSource.getRepository(PgUser);
+  });
+
+  beforeEach(() => {
+    backup.restore();
+    sut = new PgUserAccountRepository(userDataSource);
+  });
+
   describe("load", () => {
-    let sut: LoadUserAccountRepository;
-    let pgUserRepo: Repository<PgUser>;
-    let userDataSource: DataSource;
-    let backup: IBackup;
-
-    beforeAll(async () => {
-      const { db, dataSource } = await makeFakeDb();
-      userDataSource = dataSource;
-      backup = db.backup();
-
-      pgUserRepo = userDataSource.getRepository(PgUser);
-    });
-
-    beforeEach(() => {
-      backup.restore();
-      sut = new PgUserAccountRepository(userDataSource);
-    });
-
     it("should return an account if email exists", async () => {
       await pgUserRepo.save({ email: "any_email" });
 
