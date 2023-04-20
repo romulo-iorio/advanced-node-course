@@ -1,9 +1,6 @@
-import {
-  type DataSource,
-  PrimaryGeneratedColumn,
-  Column,
-  Entity,
-} from "typeorm";
+import type { DataSource, Repository } from "typeorm";
+import type { IBackup } from "pg-mem";
+import { PrimaryGeneratedColumn, Column, Entity } from "typeorm";
 import { newDb } from "pg-mem";
 
 import type { LoadUserAccountRepository } from "@/data/contracts/repos";
@@ -39,44 +36,50 @@ class PgUserAccountRepository implements LoadUserAccountRepository {
 }
 
 describe("PgUserAccountRepository", () => {
-  let sut: LoadUserAccountRepository;
-  let userDataSource: DataSource;
-
-  beforeAll(async () => {
-    const db = newDb({
-      autoCreateForeignKeyIndices: true,
-    });
-
-    db.public.registerFunction({
-      implementation: () => "test",
-      name: "current_database",
-    });
-
-    userDataSource = await db.adapters.createTypeormDataSource({
-      type: "postgres",
-      entities: [PgUser],
-    });
-
-    await userDataSource.initialize();
-    await userDataSource.synchronize();
-  });
-
-  beforeEach(() => {
-    sut = new PgUserAccountRepository(userDataSource);
-  });
-
   describe("load", () => {
-    it("should return an account if email exists", async () => {
-      const pgUserRepo = userDataSource.getRepository(PgUser);
-      await pgUserRepo.save({ email: "existing_email" });
+    let sut: LoadUserAccountRepository;
+    let pgUserRepo: Repository<PgUser>;
+    let userDataSource: DataSource;
+    let backup: IBackup;
 
-      const account = await sut.load({ email: "existing_email" });
+    beforeAll(async () => {
+      const db = newDb({
+        autoCreateForeignKeyIndices: true,
+      });
+
+      db.public.registerFunction({
+        implementation: () => "test",
+        name: "current_database",
+      });
+
+      userDataSource = await db.adapters.createTypeormDataSource({
+        type: "postgres",
+        entities: [PgUser],
+      });
+
+      await userDataSource.initialize();
+      await userDataSource.synchronize();
+
+      backup = db.backup();
+
+      pgUserRepo = userDataSource.getRepository(PgUser);
+    });
+
+    beforeEach(() => {
+      backup.restore();
+      sut = new PgUserAccountRepository(userDataSource);
+    });
+
+    it("should return an account if email exists", async () => {
+      await pgUserRepo.save({ email: "any_email" });
+
+      const account = await sut.load({ email: "any_email" });
 
       expect(account).toEqual({ id: "1" });
     });
 
     it("should return an account if email exists", async () => {
-      const account = await sut.load({ email: "new_email" });
+      const account = await sut.load({ email: "any_email" });
 
       expect(account).toBeUndefined();
     });
