@@ -1,36 +1,10 @@
 import type { DataSource, Repository } from "typeorm";
-import type { IBackup, IMemoryDb } from "pg-mem";
-import { newDb } from "pg-mem";
+import type { IBackup } from "pg-mem";
 
 import type { LoadUserAccountRepository } from "@/data/contracts/repos";
 import { PgUserAccountRepository } from "@/infra/postgres/repos";
+import { makeFakeDb } from "@/tests/infra/postgres/mocks";
 import { PgUser } from "@/infra/postgres/entities";
-
-type FakeDbReturn = {
-  dataSource: DataSource;
-  db: IMemoryDb;
-};
-
-const makeFakeDb = async (entities?: unknown[]): Promise<FakeDbReturn> => {
-  const db = newDb({
-    autoCreateForeignKeyIndices: true,
-  });
-
-  db.public.registerFunction({
-    implementation: () => "test",
-    name: "current_database",
-  });
-
-  const dataSource = await db.adapters.createTypeormDataSource({
-    type: "postgres",
-    entities: entities ?? ["src/infra/postgres/entities/index.ts"],
-  });
-
-  await dataSource.initialize();
-  await dataSource.synchronize();
-
-  return { db, dataSource };
-};
 
 describe("PgUserAccountRepository", () => {
   describe("load", () => {
