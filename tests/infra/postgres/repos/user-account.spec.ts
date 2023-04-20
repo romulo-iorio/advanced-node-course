@@ -1,39 +1,36 @@
 import type { DataSource, Repository } from "typeorm";
-import type { IBackup } from "pg-mem";
-import { PrimaryGeneratedColumn, Column, Entity } from "typeorm";
+import type { IBackup, IMemoryDb } from "pg-mem";
 import { newDb } from "pg-mem";
 
 import type { LoadUserAccountRepository } from "@/data/contracts/repos";
+import { PgUserAccountRepository } from "@/infra/postgres/repos";
+import { PgUser } from "@/infra/postgres/entities";
 
-@Entity({ name: "usuarios" })
-class PgUser {
-  @PrimaryGeneratedColumn()
-  id!: number;
+type FakeDbReturn = {
+  dataSource: DataSource;
+  db: IMemoryDb;
+};
 
-  @Column({ name: "nome", nullable: true })
-  name?: string;
+const makeFakeDb = async (entities?: unknown[]): Promise<FakeDbReturn> => {
+  const db = newDb({
+    autoCreateForeignKeyIndices: true,
+  });
 
-  @Column()
-  email!: string;
+  db.public.registerFunction({
+    implementation: () => "test",
+    name: "current_database",
+  });
 
-  @Column({ name: "id_facebook", nullable: true })
-  facebookId?: string;
-}
+  const dataSource = await db.adapters.createTypeormDataSource({
+    type: "postgres",
+    entities: entities ?? ["src/infra/postgres/entities/index.ts"],
+  });
 
-class PgUserAccountRepository implements LoadUserAccountRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  await dataSource.initialize();
+  await dataSource.synchronize();
 
-  async load(
-    params: LoadUserAccountRepository.Params
-  ): Promise<LoadUserAccountRepository.Result> {
-    const pgUserRepo = this.dataSource.getRepository(PgUser);
-    const pgUser = await pgUserRepo.findOneBy({ email: params.email });
-
-    if (pgUser == null) return;
-
-    return { id: pgUser.id.toString(), name: pgUser.name ?? undefined };
-  }
-}
+  return { db, dataSource };
+};
 
 describe("PgUserAccountRepository", () => {
   describe("load", () => {
@@ -43,23 +40,8 @@ describe("PgUserAccountRepository", () => {
     let backup: IBackup;
 
     beforeAll(async () => {
-      const db = newDb({
-        autoCreateForeignKeyIndices: true,
-      });
-
-      db.public.registerFunction({
-        implementation: () => "test",
-        name: "current_database",
-      });
-
-      userDataSource = await db.adapters.createTypeormDataSource({
-        type: "postgres",
-        entities: [PgUser],
-      });
-
-      await userDataSource.initialize();
-      await userDataSource.synchronize();
-
+      const { db, dataSource } = await makeFakeDb();
+      userDataSource = dataSource;
       backup = db.backup();
 
       pgUserRepo = userDataSource.getRepository(PgUser);
