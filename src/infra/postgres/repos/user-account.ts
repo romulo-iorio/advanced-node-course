@@ -9,6 +9,7 @@ import { PgUser } from "@/infra/postgres/entities";
 type LoadParams = LoadUserAccountRepository.Params;
 type LoadResult = LoadUserAccountRepository.Result;
 type SaveParams = SaveFacebookAccountRepository.Params;
+type SaveResult = SaveFacebookAccountRepository.Result;
 
 export class PgUserAccountRepository implements LoadUserAccountRepository {
   private readonly pgUserRepo: Repository<PgUser>;
@@ -25,24 +26,29 @@ export class PgUserAccountRepository implements LoadUserAccountRepository {
     return { id: pgUser.id.toString(), name: pgUser.name ?? undefined };
   }
 
-  async create(params: SaveParams): Promise<void> {
-    await this.pgUserRepo.save({
+  async create(params: SaveParams): Promise<SaveResult> {
+    const pgUser = await this.pgUserRepo.save({
       facebookId: params.facebookId,
       email: params.email,
       name: params.name,
     });
+
+    return { id: pgUser.id.toString() };
   }
 
   async update(params: SaveParams): Promise<void> {
+    const id = parseInt(`${params.id ?? ""}`, 10);
+
     await this.pgUserRepo.update(
-      { id: parseInt(`${params.id ?? ""}`, 10) },
+      { id },
       { facebookId: params.facebookId, name: params.name }
     );
   }
 
-  async saveWithFacebook(params: SaveParams): Promise<void> {
+  async saveWithFacebook(params: SaveParams): Promise<SaveResult> {
     if (params.id == null) return this.create(params);
 
     await this.update(params);
+    return { id: params.id };
   }
 }
