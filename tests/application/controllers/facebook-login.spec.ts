@@ -11,28 +11,44 @@ class FacebookLoginController {
   ) {}
 
   async handle(httpRequest: any): Promise<HttpResponse> {
-    if (httpRequest.token === "" || httpRequest.token == null) {
+    try {
+      if (httpRequest.token === "" || httpRequest.token == null) {
+        return {
+          statusCode: 400,
+          data: new Error("The field token is required"),
+        };
+      }
+
+      const result = await this.facebookAuthentication.perform({
+        token: httpRequest.token,
+      });
+
+      if (result instanceof AccessToken) {
+        return {
+          statusCode: 200,
+          data: { accessToken: result.value },
+        };
+      }
+
       return {
-        statusCode: 400,
-        data: new Error("The field token is required"),
+        statusCode: 401,
+        data: result,
+      };
+    } catch (err) {
+      const error = err as Error;
+      return {
+        statusCode: 500,
+        data: new ServerError(error),
       };
     }
+  }
+}
 
-    const result = await this.facebookAuthentication.perform({
-      token: httpRequest.token,
-    });
-
-    if (result instanceof AccessToken) {
-      return {
-        statusCode: 200,
-        data: { accessToken: result.value },
-      };
-    }
-
-    return {
-      statusCode: 401,
-      data: result,
-    };
+class ServerError extends Error {
+  constructor(error?: Error) {
+    super("Internal server error. Try again later");
+    this.name = "ServerError";
+    this.stack = error?.stack;
   }
 }
 
@@ -100,6 +116,18 @@ describe("FacebookLoginController", () => {
     expect(httpResponse).toEqual({
       statusCode: 200,
       data: { accessToken: "any_value" },
+    });
+  });
+
+  it("should return 500 if authentication throws", async () => {
+    const error = new Error("infra_error");
+    facebookAuth.perform.mockRejectedValueOnce(error);
+
+    const httpResponse = await sut.handle({ token: "any_token" });
+
+    expect(httpResponse).toEqual({
+      statusCode: 500,
+      data: new ServerError(error),
     });
   });
 });
