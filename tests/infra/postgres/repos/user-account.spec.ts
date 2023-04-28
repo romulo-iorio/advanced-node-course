@@ -1,13 +1,12 @@
 import type { DataSource, Repository } from "typeorm";
 import type { IBackup } from "pg-mem";
 
-import type { LoadUserAccountRepository } from "@/data/contracts/repos";
 import { PgUserAccountRepository } from "@/infra/postgres/repos";
 import { makeFakeDb } from "@/tests/infra/postgres/mocks";
 import { PgUser } from "@/infra/postgres/entities";
 
 describe("PgUserAccountRepository", () => {
-  let sut: LoadUserAccountRepository;
+  let sut: PgUserAccountRepository;
   let pgUserRepo: Repository<PgUser>;
   let userDataSource: DataSource;
   let backup: IBackup;
@@ -38,6 +37,19 @@ describe("PgUserAccountRepository", () => {
       const account = await sut.load({ email: "any_email" });
 
       expect(account).toBeUndefined();
+    });
+  });
+
+  describe("saveWithFacebook", () => {
+    it("should create an account if id is undefined", async () => {
+      await sut.saveWithFacebook({
+        facebookId: "any_fb_id",
+        email: "any_email",
+        name: "any_name",
+      });
+      const pgUser = await pgUserRepo.findOneBy({ email: "any_email" });
+
+      expect(pgUser?.id).toBe(1);
     });
   });
 });
