@@ -10,24 +10,29 @@ import {
 import { RequiredFieldError } from "@/application/errors";
 import { AccessToken } from "@/domain/models";
 
+type HttpRequest = {
+  token: string | undefined | null;
+};
+
 export class FacebookLoginController {
   constructor(
     private readonly facebookAuthentication: FacebookAuthentication
   ) {}
 
-  async handle(httpRequest: any): Promise<HttpResponse> {
+  async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     const { token } = httpRequest;
 
     try {
       if (token === "" || token == null)
         return badRequest(new RequiredFieldError("token"));
 
-      const accessToken = await this.facebookAuthentication.perform({ token });
+      const result = await this.facebookAuthentication.perform({ token });
 
-      if (accessToken instanceof AccessToken)
-        return ok({ accessToken: accessToken.value });
+      if (!(result instanceof AccessToken)) return unauthorized();
 
-      return unauthorized();
+      const { value: accessToken } = result;
+
+      return ok({ accessToken });
     } catch (err) {
       return serverError(err as Error);
     }
