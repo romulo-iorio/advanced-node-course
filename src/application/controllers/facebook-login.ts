@@ -14,12 +14,14 @@ type HttpRequest = {
   token: string | undefined | null;
 };
 
+type Model = Error | { accessToken: string };
+
 export class FacebookLoginController {
   constructor(
     private readonly facebookAuthentication: FacebookAuthentication
   ) {}
 
-  async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
+  async handle(httpRequest: HttpRequest): Promise<HttpResponse<Model>> {
     const { token } = httpRequest;
 
     try {
