@@ -1,14 +1,9 @@
 import type { FacebookAuthentication } from "@/domain/features";
+import type { HttpResponse } from "@/application/helpers";
 
-import {
-  type HttpResponse,
-  unauthorized,
-  serverError,
-  badRequest,
-  ok,
-} from "@/application/helpers";
-import { RequiredFieldError } from "@/application/errors";
+import { RequiredStringValidator } from "@/application/validation";
 import { AccessToken } from "@/domain/models";
+import * as httpResponseHelpers from "@/application/helpers";
 
 type HttpRequest = {
   token: string | undefined | null;
@@ -22,9 +17,8 @@ export class FacebookLoginController {
   ) {}
 
   private validate(httpRequest: HttpRequest): Error | undefined {
-    const { token } = httpRequest;
-
-    if (token === "" || token == null) return new RequiredFieldError("token");
+    const validator = new RequiredStringValidator(httpRequest.token, "token");
+    return validator.validate();
   }
 
   public async handle(httpRequest: HttpRequest): Promise<HttpResponse<Model>> {
@@ -32,19 +26,19 @@ export class FacebookLoginController {
 
     try {
       const error = this.validate(httpRequest);
-      if (error !== undefined) return badRequest(error);
-      if (token == null) return unauthorized();
+      if (error !== undefined) return httpResponseHelpers.badRequest(error);
+      if (token == null) return httpResponseHelpers.unauthorized();
 
       const result = await this.facebookAuthentication.perform({ token });
 
       const isAccessToken = result instanceof AccessToken;
-      if (!isAccessToken) return unauthorized();
+      if (!isAccessToken) return httpResponseHelpers.unauthorized();
 
       const { value: accessToken } = result;
 
-      return ok({ accessToken });
+      return httpResponseHelpers.ok({ accessToken });
     } catch (err) {
-      return serverError(err as Error);
+      return httpResponseHelpers.serverError(err as Error);
     }
   }
 }
