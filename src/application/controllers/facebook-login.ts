@@ -28,7 +28,8 @@ export class FacebookLoginController {
 
       const result = await this.facebookAuthentication.perform({ token });
 
-      if (!(result instanceof AccessToken)) return unauthorized();
+      const isAccessToken = result instanceof AccessToken;
+      if (!isAccessToken) return unauthorized();
 
       const { value: accessToken } = result;
 
