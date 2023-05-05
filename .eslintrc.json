@@ -15,6 +15,7 @@
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/comma-dangle": "off",
     "@typescript-eslint/indent": "off",
-    "@typescript-eslint/return-await": "off"
+    "@typescript-eslint/return-await": "off",
+    "curly": "off"
   }
 }
