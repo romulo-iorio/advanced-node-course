@@ -21,12 +21,19 @@ export class FacebookLoginController {
     private readonly facebookAuthentication: FacebookAuthentication
   ) {}
 
-  async handle(httpRequest: HttpRequest): Promise<HttpResponse<Model>> {
+  private validate(httpRequest: HttpRequest): Error | undefined {
+    const { token } = httpRequest;
+
+    if (token === "" || token == null) return new RequiredFieldError("token");
+  }
+
+  public async handle(httpRequest: HttpRequest): Promise<HttpResponse<Model>> {
     const { token } = httpRequest;
 
     try {
-      if (token === "" || token == null)
-        return badRequest(new RequiredFieldError("token"));
+      const error = this.validate(httpRequest);
+      if (error !== undefined) return badRequest(error);
+      if (token == null) return unauthorized();
 
       const result = await this.facebookAuthentication.perform({ token });
 
