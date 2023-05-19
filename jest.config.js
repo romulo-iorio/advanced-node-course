@@ -1,8 +1,3 @@
-/*
- * For a detailed explanation regarding each configuration property, visit:
- * https://jestjs.io/docs/configuration
- */
-
 module.exports = {
   collectCoverageFrom: [
     "<rootDir>/src/**/*.ts",
@@ -20,4 +15,5 @@ module.exports = {
     "\\.ts$": "ts-jest",
   },
   clearMocks: true,
+  testMatch: ["**/*.spec.ts"],
 };
