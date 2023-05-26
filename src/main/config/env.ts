@@ -5,6 +5,7 @@ const {
   FB_CLIENT_SECRET,
   FB_TEST_USER_ID,
   FB_CLIENT_ID,
+  PORT,
 } = process.env;
 
 export const facebookApi = {
@@ -20,4 +21,6 @@ export const facebookApi = {
   },
 };
 
-export default { facebookApi };
+export const port = PORT ?? 8080;
+
+export default { facebookApi, port };
