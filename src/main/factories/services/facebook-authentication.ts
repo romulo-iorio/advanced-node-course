@@ -1,7 +1,9 @@
 import { FacebookAuthenticationService } from "@/data/contracts/services";
-import { makePgUserAccountRepository } from "@/main/factories/repos";
-import { makeJwtTokenGenerator } from "@/main/factories/crypto";
-import { makeFacebookApi } from "@/main/factories/apis";
+import {
+  makePgUserAccountRepository,
+  makeJwtTokenGenerator,
+  makeFacebookApi,
+} from "@/main/factories";
 
 export const makeFacebookAuthenticationService =
   (): FacebookAuthenticationService => {
