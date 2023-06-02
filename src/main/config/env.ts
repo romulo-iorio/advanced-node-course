@@ -5,6 +5,7 @@ const {
   FB_CLIENT_SECRET,
   FB_TEST_USER_ID,
   FB_CLIENT_ID,
+  JWT_SECRET,
   PORT,
 } = process.env;
 
@@ -22,5 +23,6 @@ export const facebookApi = {
 };
 
 export const port = PORT ?? 8080;
+export const jwtSecret = JWT_SECRET ?? "21gfd351g";
 
 export default { facebookApi, port };
